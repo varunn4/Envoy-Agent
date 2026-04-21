@@ -1,0 +1,277 @@
+@import './animations.css';
+
+/* ── Design tokens ─────────────────────────────────────────── */
+:root {
+  --bg:           #080C14;
+  --surface:      #0D1420;
+  --card:         #111827;
+  --card-hover:   #141E30;
+  --border:       #1C2A3E;
+  --border-2:     #243044;
+  --blue:         #2563EB;
+  --blue-dim:     rgba(37,99,235,0.12);
+  --blue-glow:    rgba(37,99,235,0.25);
+  --green:        #10B981;
+  --green-dim:    rgba(16,185,129,0.10);
+  --amber:        #F59E0B;
+  --amber-dim:    rgba(245,158,11,0.10);
+  --red:          #EF4444;
+  --red-dim:      rgba(239,68,68,0.10);
+  --sky:          #38BDF8;
+  --violet:       #818CF8;
+  --t1:           #F1F5F9;
+  --t2:           #94A3B8;
+  --t3:           #475569;
+  --radius:       10px;
+  --radius-sm:    7px;
+  --radius-pill:  100px;
+
+  --topbar-h:     52px;
+  --controls-h:   56px;
+  --stats-h:      auto;
+  --bottombar-h:  36px;
+}
+
+/* ── Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--t1);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* CRT scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.025) 2px,
+    rgba(0,0,0,0.025) 3px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar            { width: 4px; height: 4px; }
+::-webkit-scrollbar-track     { background: transparent; }
+::-webkit-scrollbar-thumb     { background: var(--border-2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover{ background: var(--t3); }
+
+/* ── Typography helpers ────────────────────────────────────── */
+.font-syne   { font-family: 'Syne', sans-serif; }
+.font-dm     { font-family: 'DM Sans', sans-serif; }
+.font-mono   { font-family: 'JetBrains Mono', monospace; }
+
+/* ── Utility classes ───────────────────────────────────────── */
+.truncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+}
+
+/* ── Input base ────────────────────────────────────────────── */
+.input-base {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: var(--card);
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  color: var(--t1);
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-base::placeholder { color: var(--t3); }
+.input-base:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--blue-dim);
+}
+
+select.input-base {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23475569'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+/* ── Field label ───────────────────────────────────────────── */
+.field-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--t3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: block;
+  margin-bottom: 5px;
+}
+
+/* ── Button base ───────────────────────────────────────────── */
+.btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+}
+.btn:disabled { cursor: not-allowed; opacity: 0.6; }
+
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #1D4ED8;
+  box-shadow: 0 0 24px var(--blue-glow);
+}
+.btn-primary:disabled {
+  background: #1C2A3E;
+  color: var(--t3);
+  box-shadow: none;
+}
+
+.btn-danger {
+  background: var(--red-dim);
+  color: var(--red);
+  border: 1px solid rgba(239,68,68,0.25);
+}
+
+.btn-ghost {
+  background: var(--card);
+  color: var(--t3);
+  border: 1px solid var(--border-2);
+}
+.btn-ghost:hover:not(:disabled) { color: var(--t1); }
+
+/* ── Status LED ────────────────────────────────────────────── */
+.led {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.led-idle    { background: #334155; }
+.led-running { background: var(--green); color: var(--green); animation: pulse-led 1.5s ease-in-out infinite; }
+.led-waiting { background: var(--amber); color: var(--amber); animation: pulse-led 1.2s ease-in-out infinite; }
+.led-stopped { background: var(--red); }
+
+/* ── Status badge ──────────────────────────────────────────── */
+.badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+/* ── Spinning icon ─────────────────────────────────────────── */
+.spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+  font-style: normal;
+}
+
+/* ── Step label pulse ──────────────────────────────────────── */
+.step-pulse {
+  animation: step-pulse 1.5s ease-in-out infinite;
+}
+
+/* ── App shell layout ──────────────────────────────────────── */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-width: 1280px;
+  overflow: hidden;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Pill toggle ───────────────────────────────────────────── */
+.toggle-pill {
+  width: 36px;
+  height: 20px;
+  border-radius: var(--radius-pill);
+  background: var(--border-2);
+  border: 1px solid var(--border-2);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+.toggle-pill::after {
+  content: '';
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--t3);
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s, background 0.2s;
+}
+.toggle-pill.on {
+  background: rgba(245,158,11,0.2);
+  border-color: rgba(245,158,11,0.4);
+  box-shadow: 0 0 8px rgba(245,158,11,0.2);
+}
+.toggle-pill.on::after {
+  transform: translateX(16px);
+  background: var(--amber);
+}
+
+/* ── Progress bar ──────────────────────────────────────────── */
+.progress-track {
+  height: 2px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 10px;
+}

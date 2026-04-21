@@ -1,0 +1,59 @@
+sender:
+  name: "Pratik"
+  company: "Aonami Technologies"
+  role: "Founder"
+  value_prop: >
+    We build custom software for BFSI and healthtech startups --
+    lean teams, fast delivery, no bloat. We've shipped LOS/LMS
+    platforms, patient data pipelines, and developer tooling.
+  tone: "direct, warm, founder-to-founder -- not salesy"
+  cta: "15-minute call this week"
+  signature: "Pratik"
+
+icp:
+  titles:
+    - "Founder"
+    - "Co-Founder"
+    - "CTO"
+    - "VP Engineering"
+    - "Head of Product"
+    - "CEO"
+  industries:
+    - "fintech"
+    - "healthtech"
+    - "BFSI"
+    - "SaaS"
+  company_size:
+    min: 10
+    max: 300
+  exclude_domains:
+    - "google.com"
+    - "microsoft.com"
+
+run:
+  leads_per_run: 10
+  fit_score_threshold: 6
+  dry_run: true
+  leads_source: "csv"
+  csv_path: "./data/leads.csv"
+
+scraping:
+  timeout_ms: 15000
+  linkedin_wait_ms: 3000
+  website_wait_ms: 2000
+  save_screenshots: true
+  max_text_length: 1000
+
+gchat:
+  poll_interval_seconds: 30
+  poll_timeout_minutes: 60
+
+claude:
+  model: "claude-sonnet-4-5"
+  groq_model: "llama-3.3-70b-versatile"
+  max_tokens: 1000
+  fit_score_threshold: 6
+
+email:
+  subject_max_words: 8
+  body_max_words: 120
