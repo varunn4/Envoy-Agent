@@ -86,13 +86,15 @@ function StatCell({ label, value, accentColor, delta }: StatCellProps) {
 }
 
 export function StatsRow({ stats }: StatsRowProps) {
+  const readyForReviewCount = stats.drafted + stats.pending;
+  const readyForReviewDelta = stats.drafted + stats.pending;
+
   const cells: StatCellProps[] = [
-    { label: 'Total Pulled',      value: stats.total,    accentColor: '#475569',       delta: stats.total },
-    { label: 'Profiled',          value: stats.profiled, accentColor: 'var(--sky)',    delta: stats.profiled },
-    { label: 'Drafted',           value: stats.drafted,  accentColor: 'var(--blue)',   delta: stats.drafted },
-    { label: 'Awaiting Approval', value: stats.pending,  accentColor: 'var(--amber)',  delta: stats.pending },
-    { label: 'Sent',              value: stats.sent,     accentColor: 'var(--green)',  delta: stats.sent },
-    { label: 'Skipped / Low Fit', value: stats.skipped,  accentColor: 'var(--t3)',    delta: stats.skipped },
+    { label: 'Total Pulled',      value: stats.total,          accentColor: '#475569',       delta: stats.total },
+    { label: 'Profiled',          value: stats.profiled,       accentColor: 'var(--sky)',    delta: stats.profiled },
+    { label: 'Ready for Review',  value: readyForReviewCount,  accentColor: 'var(--purple)', delta: readyForReviewDelta },
+    { label: 'Sent',              value: stats.sent,           accentColor: 'var(--green)',  delta: stats.sent },
+    { label: 'Skipped / Low Fit', value: stats.skipped,        accentColor: 'var(--t3)',    delta: stats.skipped },
   ];
 
   return (

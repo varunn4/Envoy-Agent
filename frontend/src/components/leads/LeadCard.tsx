@@ -16,7 +16,6 @@ interface LeadCardProps {
   onSkip:    (id: string) => void;
 }
 
-
 // Stage chip with blinking dot for active stages
 function StagePill({ status }: { status: Lead['status'] }) {
   const accentColor = STATUS_ACCENT[status];
@@ -63,33 +62,75 @@ interface ReviewPanelProps {
   onBodyChange: (value: string) => void;
   onSend: (e: React.MouseEvent) => void;
   onReject: (e: React.MouseEvent) => void;
+  onClose: () => void;
   sending: boolean;
-  rejecting: boolean;
   dryRun: boolean;
+  isOverlay?: boolean;
+  sendError?: string | null;
 }
 
-function ReviewPanel({ draftBody, onBodyChange, onSend, onReject, sending, rejecting, dryRun }: ReviewPanelProps) {
+function ReviewPanel({ draftBody, onBodyChange, onSend, onReject, onClose, sending, dryRun, isOverlay = false, sendError }: ReviewPanelProps) {
+  const panelStyle = isOverlay ? {
+    position: 'absolute' as const,
+    bottom: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: 'rgba(13, 17, 23, 0.95)',
+    backdropFilter: 'blur(8px)',
+    zIndex: 50,
+    borderRadius: 'var(--radius)',
+    display: 'flex',
+    flexDirection: 'column' as const,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  } : {
+    background: 'rgba(0,0,0,0.3)',
+    border: '1px solid rgba(0,209,255,0.3)',
+    borderRadius: '8px',
+    minHeight: 100,
+    padding: 16,
+    overflow: 'visible',
+    marginBottom: 12,
+  };
+
   return (
-    <div style={{
-      background: 'rgba(0,0,0,0.2)',
-      border: '1px solid var(--sky)',
-      borderRadius: 'var(--radius-sm)',
-      minHeight: 120,
-      padding: 16,
-      overflow: 'visible',
-    }}>
+    <div style={panelStyle} data-testid="review-overlay">
+      {isOverlay && (
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: 10,
+            right: 10,
+            background: 'transparent',
+            border: 'none',
+            color: 'var(--t3)',
+            fontSize: 16,
+            cursor: 'pointer',
+            padding: '4px',
+            borderRadius: '4px',
+          }}
+        >
+          ✕
+        </button>
+      )}
+
       <textarea
         value={draftBody}
         onChange={(e) => onBodyChange(e.target.value)}
+        placeholder="Edit email draft..."
         style={{
           width: '100%',
+          height: isOverlay ? '60%' : 'auto',
           fontSize: 14,
           color: '#fff',
-          background: 'transparent',
-          border: '1px solid rgba(255,255,255,0.12)',
-          borderRadius: 10,
+          background: 'rgba(0,0,0,0.4)',
+          border: '1px solid rgba(0,209,255,0.2)',
+          borderRadius: 8,
           padding: 12,
-          minHeight: 120,
+          minHeight: isOverlay ? 'auto' : 100,
           resize: 'vertical',
           outline: 'none',
           fontFamily: 'DM Sans, sans-serif',
@@ -102,6 +143,8 @@ function ReviewPanel({ draftBody, onBodyChange, onSend, onReject, sending, rejec
         gap: 10,
         flexWrap: 'wrap',
         marginTop: 12,
+        width: '100%',
+        justifyContent: isOverlay ? 'center' : 'flex-start',
       }}>
         <motion.button
           whileHover={!dryRun && !sending ? { scale: 1.02 } : {}}
@@ -109,49 +152,63 @@ function ReviewPanel({ draftBody, onBodyChange, onSend, onReject, sending, rejec
           onClick={onSend}
           disabled={dryRun || sending}
           style={{
-            background: dryRun ? 'rgba(71,85,105,0.15)' : 'rgba(16,185,129,0.18)',
+            background: dryRun ? 'rgba(71,85,105,0.15)' : 'rgba(16,185,129,0.25)',
             color: dryRun ? 'var(--t3)' : 'var(--green)',
-            border: '1px solid rgba(16,185,129,0.35)',
-            boxShadow: dryRun ? 'none' : '0 0 18px rgba(16,185,129,0.2)',
+            border: '1.5px solid' + (dryRun ? ' rgba(71,85,105,0.3)' : ' rgba(16,185,129,0.6)'),
+            boxShadow: dryRun ? 'none' : '0 0 12px rgba(16,185,129,0.15)',
             fontFamily: 'JetBrains Mono, monospace',
             fontSize: 11,
-            fontWeight: 600,
-            padding: '8px 16px',
-            borderRadius: 'var(--radius-sm)',
+            fontWeight: 700,
+            padding: '10px 16px',
+            borderRadius: '6px',
             cursor: dryRun ? 'not-allowed' : (sending ? 'wait' : 'pointer'),
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 8,
-            opacity: sending ? 0.72 : 1,
+            gap: 6,
+            opacity: sending ? 0.7 : 1,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
           }}
         >
-          {sending ? 'Sending...' : 'Accept & Send'}
+          {sending ? '⟳ Sending...' : '✓ Send Now'}
         </motion.button>
 
         <motion.button
-          whileHover={!rejecting ? { scale: 1.02 } : {}}
-          whileTap={!rejecting ? { scale: 0.97 } : {}}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.97 }}
           onClick={onReject}
-          disabled={rejecting}
           style={{
-            background: 'transparent',
+            background: 'rgba(239,68,68,0.15)',
             color: 'var(--red)',
-            border: '1px solid rgba(239,68,68,0.35)',
+            border: '1.5px solid rgba(239,68,68,0.5)',
             fontFamily: 'JetBrains Mono, monospace',
             fontSize: 11,
-            fontWeight: 600,
-            padding: '8px 16px',
-            borderRadius: 'var(--radius-sm)',
-            cursor: rejecting ? 'wait' : 'pointer',
+            fontWeight: 700,
+            padding: '10px 16px',
+            borderRadius: '6px',
+            cursor: 'pointer',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: 8,
-            opacity: rejecting ? 0.72 : 1,
+            gap: 6,
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
           }}
         >
-          {rejecting ? 'Rejecting...' : 'Reject'}
+          ✕ Discard
         </motion.button>
       </div>
+
+      {sendError && !dryRun && (
+        <div style={{
+          marginTop: 12,
+          fontFamily: 'JetBrains Mono, monospace',
+          fontSize: 10,
+          color: 'var(--red)',
+          textAlign: 'center',
+        }}>
+          ✕ {sendError}
+        </div>
+      )}
     </div>
   );
 }
@@ -159,7 +216,6 @@ function ReviewPanel({ draftBody, onBodyChange, onSend, onReject, sending, rejec
 export function LeadCard({ lead, index, dryRun, onApprove, onRewrite, onSkip }: LeadCardProps) {
   const [reviewOpen,    setReviewOpen]    = useState(false);
   const [sending,       setSending]       = useState(false);
-  const [rejecting,     setRejecting]     = useState(false);
   const [sendError,     setSendError]     = useState<string | null>(null);
   const [draftText,     setDraftText]     = useState(lead.editableDraftBody || lead.draftBody || '');
 
@@ -171,7 +227,6 @@ export function LeadCard({ lead, index, dryRun, onApprove, onRewrite, onSkip }: 
   const isPending   = lead.status === 'pending' || lead.status === 'rewriting';
   const isDrafted   = lead.status === 'drafted';
   const isDone      = TERMINAL_STATUSES.includes(lead.status);
-  const hasDraft    = !!lead.draftBody || !!lead.draftSubject;
 
   let cardBorder = '1px solid var(--border)';
   let cardShadow = 'none';
@@ -208,16 +263,8 @@ export function LeadCard({ lead, index, dryRun, onApprove, onRewrite, onSkip }: 
 
   const handleReject = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (rejecting) return;
-    setRejecting(true);
-    try {
-      onSkip(lead.id);
-    } finally {
-      setRejecting(false);
-    }
+    setReviewOpen(false);
   };
-
-  const showDraftReview = hasDraft || isDrafted;
 
   return (
     <motion.div
@@ -229,13 +276,15 @@ export function LeadCard({ lead, index, dryRun, onApprove, onRewrite, onSkip }: 
         flexDirection: 'column',
         gap: 16,
         width: '100%',
+        height: 'auto',
         background: 'var(--card)',
         border: cardBorder,
         borderRadius: 'var(--radius)',
         padding: 24,
-        minHeight: 180,
+        paddingBottom: 30,
+        minHeight: 220,
         position: 'relative',
-        overflow: 'visible',
+        overflow: 'hidden',
         boxShadow: cardShadow,
         cursor: 'default',
         transition: 'box-shadow 0.2s, border-color 0.2s, background 0.2s',
@@ -253,17 +302,23 @@ export function LeadCard({ lead, index, dryRun, onApprove, onRewrite, onSkip }: 
       {dryRun && (
         <div style={{
           position: 'absolute',
-          top: 16,
-          left: 20,
+          top: -10,
+          left: 10,
           fontFamily: 'JetBrains Mono, monospace',
           fontSize: 9,
-          color: 'var(--amber)',
-          border: '1px solid rgba(245,158,11,0.3)',
-          padding: '2px 6px',
+          color: '#FFA500',
+          background: 'rgba(255, 165, 0, 0.2)',
+          border: '1px solid rgba(255, 165, 0, 0.5)',
+          padding: '4px 8px',
           borderRadius: 4,
-          opacity: 0.7,
-          zIndex: 2,
-        }}>DRY</div>
+          opacity: 0.95,
+          zIndex: 20,
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.5px',
+        }}>
+          DRY RUN
+        </div>
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, minWidth: 0 }}>
@@ -308,60 +363,6 @@ export function LeadCard({ lead, index, dryRun, onApprove, onRewrite, onSkip }: 
         </span>
       )}
 
-      {showDraftReview && (
-        <div>
-          <motion.button
-            onClick={(e) => {
-              e.stopPropagation();
-              setReviewOpen((prev) => !prev);
-            }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            style={{
-              background: 'rgba(37,99,235,0.14)',
-              color: 'var(--sky)',
-              border: '1px solid var(--sky)',
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 11,
-              fontWeight: 600,
-              padding: '10px 18px',
-              borderRadius: 'var(--radius-sm)',
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-            }}
-          >
-            {reviewOpen ? 'Hide Review Draft' : 'Review Draft'}
-          </motion.button>
-        </div>
-      )}
-
-      {reviewOpen && showDraftReview && (
-        <div style={{ overflow: 'visible' }}>
-          <ReviewPanel
-            draftBody={draftText}
-            onBodyChange={setDraftText}
-            onSend={handleApproveSend}
-            onReject={handleReject}
-            sending={sending}
-            rejecting={rejecting}
-            dryRun={dryRun}
-          />
-
-          {sendError && !dryRun && (
-            <div style={{
-              marginTop: 12,
-              fontFamily: 'JetBrains Mono, monospace',
-              fontSize: 10,
-              color: 'var(--red)',
-            }}>
-              ✕ {sendError}
-            </div>
-          )}
-        </div>
-      )}
-
       <AnimatePresence>
         {isPending && (
           <ApprovalBanner
@@ -369,6 +370,53 @@ export function LeadCard({ lead, index, dryRun, onApprove, onRewrite, onSkip }: 
             onApprove={onApprove}
             onRewrite={onRewrite}
             onSkip={onSkip}
+          />
+        )}
+      </AnimatePresence>
+
+      {isDrafted && (
+        <motion.button
+          onClick={(e) => {
+            e.stopPropagation();
+            setReviewOpen((prev) => !prev);
+          }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            right: 20,
+            padding: '8px 16px',
+            background: 'rgba(0, 209, 255, 0.1)',
+            color: '#00d1ff',
+            border: '1px solid rgba(0, 209, 255, 0.5)',
+            fontFamily: 'JetBrains Mono, monospace',
+            fontSize: 11,
+            fontWeight: 600,
+            borderRadius: '6px',
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            zIndex: 10,
+          }}
+        >
+          Review Draft
+        </motion.button>
+      )}
+
+      <AnimatePresence>
+        {reviewOpen && (
+          <ReviewPanel
+            draftBody={draftText}
+            onBodyChange={setDraftText}
+            onSend={handleApproveSend}
+            onReject={handleReject}
+            onClose={() => setReviewOpen(false)}
+            sending={sending}
+            dryRun={dryRun}
+            isOverlay={true}
+            sendError={sendError}
           />
         )}
       </AnimatePresence>
